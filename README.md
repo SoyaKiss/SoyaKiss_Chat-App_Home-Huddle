@@ -22,3 +22,22 @@
   <li><strong>Enhanced Communication: </strong> Options to send images and share location data within the chat.</li>
   <li><strong>Data Storage: </strong> Chat data is stored both online and offline, ensuring messages are accessible anytime.</li>
 </ul>
+
+<br>
+
+<h3>Technical Requirements</h3>
+<ul>
+  <li><strong>Platform: </strong> The app is written in React Native.</li>
+  <li><strong>Development: </strong> The app is developed using Expo.</li>
+  <li><strong>Styling: </strong> The app is styled according to the provided screen design specifications.</li>
+  <li><strong>Data Storage: </strong> Chat conversations are stored in Google Firestore Database.</li>
+  <li><strong>Authentication: </strong> The app uses Google Firebase authentication to authenticate users anonymously.</li>
+  <li><strong>Offline Storage: </strong> Chat conversations are stored locally on the user's device.</li>
+  <li><strong>Media Sharing:  </strong> Users can pick and send images from their phone’s image library or take photos using the device’s camera.</li>
+  <li><strong>Cloud Storage: </strong> Images are stored in Firebase Cloud Storage.</li>
+  <li><strong>Location Sharing: </strong> The app can read and share the user’s location data via a map view in the chat.</li>
+  <li><strong>Chat Library: </strong> The chat interface and functionality are built using the Gifted Chat library.</li>
+  <li><strong>Codebase: </strong> The app’s codebase includes comments for clarity and maintainability.</li>
+</ul>
+
+<br>
