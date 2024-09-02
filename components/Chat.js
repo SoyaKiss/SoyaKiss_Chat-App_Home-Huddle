@@ -13,9 +13,13 @@ const Chat = () => {
     }
   }, [navigation, userName]);
 
+  const fontColor = bgColor === "#B9C6AE" ? "#000000" : "#ced0d2";
+
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <Text style={styles.chatText}>Welcome, {userName}!</Text>
+      <Text style={[styles.chatText, { color: fontColor }]}>
+        Welcome, {userName}!
+      </Text>
     </View>
   );
 };
@@ -28,7 +32,8 @@ const styles = StyleSheet.create({
   },
   chatText: {
     fontSize: 24,
-    color: "white",
+    color: "#ced0d2",
+    fontFamily: "Poppins-Medium",
   },
 });
 

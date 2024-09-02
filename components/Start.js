@@ -22,7 +22,7 @@ const Start = ({ navigation }) => {
       imageStyle={styles.imageStyle}
     >
       <View style={styles.container}>
-        <Text style={styles.appTitle}>Huddle Home</Text>
+        <Text style={styles.appTitle}>Home Huddle</Text>
 
         <View style={styles.borderBox}>
           <TextInput
@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
   appTitle: {
     fontSize: 45,
     fontWeight: "600",
+    fontFamily: "Poppins-Bold",
     color: "#FFFFFF",
     position: "absolute",
     top: 125,
@@ -118,6 +119,7 @@ const styles = StyleSheet.create({
     fontWeight: "300",
     color: "#757083",
     position: "absolute",
+    fontFamily: "Poppins-Medium",
     opacity: 0.5,
     // Outer box styles
     top: 25,
@@ -139,6 +141,7 @@ const styles = StyleSheet.create({
   chooseBackgroundColor: {
     fontSize: 16,
     fontWeight: "300",
+    fontFamily: "Poppins-SemiBold",
     color: "#757083",
     marginBottom: 20,
     marginTop: 150,
@@ -163,6 +166,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
+    fontFamily: "Poppins-Regular",
   },
 });
 
