@@ -9,9 +9,13 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
   Keyboard,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
+
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 import backgroundImage from "../assets/Background Image.png";
 
@@ -21,6 +25,30 @@ const Start = ({ navigation }) => {
   // for background color options
   const [bgColor, setBgColor] = useState("");
 
+  // This is for firebase authentication
+  const auth = getAuth();
+
+  const signInUser = () => {
+    signInAnonymously(auth)
+      .then((result) => {
+        // Check if the user is logged in
+        if (result.user) {
+          // Navigate to Chat
+          navigation.navigate("Chat", {
+            userName: text,
+            bgColor: bgColor,
+            userID: result.user.uid,
+          });
+          Alert.alert("Signed in Successfully!");
+        } else {
+          Alert.alert("No user logged in, please try again.");
+        }
+      })
+      .catch((error) => {
+        Alert.alert("Unable to sign in, try again later.");
+      });
+  };
+
   return (
     <ImageBackground
       source={backgroundImage}
@@ -29,7 +57,6 @@ const Start = ({ navigation }) => {
     >
       <Text style={styles.appTitle}>Home Huddle</Text>
 
-      {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}> */}
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -37,7 +64,6 @@ const Start = ({ navigation }) => {
       >
         <View style={styles.container}>
           {/* Main interactive box */}
-
           <View style={styles.borderBox}>
             <TextInput
               style={styles.textInput}
@@ -85,19 +111,16 @@ const Start = ({ navigation }) => {
 
             <TouchableOpacity
               style={styles.startButton}
-              onPress={() =>
-                navigation.navigate("Chat", { userName: text, bgColor })
-              }
+              onPress={signInUser}
               accessibilityRole="button"
               accessibilityLabel="Start chatting"
-              accessibilityHint="Navigates to the chat screen"
+              accessibilityHint="Logs in the user and navigates to the chat screen"
             >
               <Text style={styles.startButtonText}>Start Chatting!</Text>
             </TouchableOpacity>
           </View>
         </View>
       </KeyboardAvoidingView>
-      {/* </TouchableWithoutFeedback> */}
     </ImageBackground>
   );
 };
@@ -128,7 +151,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     width: "100%",
   },
-
   container: {
     flex: 1,
     alignItems: "center",

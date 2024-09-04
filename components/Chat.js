@@ -5,14 +5,23 @@ import {
   View,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
 } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import {
+  addDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+} from "firebase/firestore";
 
-const Chat = () => {
+const Chat = ({ db }) => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { userName, bgColor } = route.params || {};
+  const { userName, userID, bgColor } = route.params || {};
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -22,31 +31,37 @@ const Chat = () => {
   }, [navigation, userName]);
 
   useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello, how are you?",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "Louis Heroux",
-          Avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-      {
-        _id: 2,
-        text: "You have entered the chat.",
-        createdAt: new Date(),
-        system: true,
-      },
-    ]);
-  }, []);
+    const messagesRef = collection(db, "messages");
 
-  const onSend = useCallback((newMessages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
+    const messagesQuery = query(messagesRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(
+      messagesQuery,
+      (snapshot) => {
+        const fetchedMessages = snapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          return {
+            _id: doc.id,
+            ...data,
+            createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+          };
+        });
+
+        setMessages(fetchedMessages);
+      },
+      (error) => {
+        console.error("Error fetching messages: ", error); // Log any errors that occur during fetching
+      }
     );
-  }, []);
+
+    // Cleanup the listener on component unmount
+    return () => unsubscribe();
+  }, [db]);
+
+  const onSend = (newMessages) => {
+    addDoc(collection(db, "messages"), newMessages[0]);
+  };
 
   const renderBubble = (props) => {
     return (
@@ -67,10 +82,10 @@ const Chat = () => {
   const fontColor = bgColor === "#B9C6AE" ? "#000000" : "#ced0d2";
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView
       style={[styles.container, { backgroundColor: bgColor }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.select({ ios: 50, android: 50 })}
+      keyboardVerticalOffset={Platform.select({ ios: 75, android: 50 })}
     >
       <View style={styles.welcomeContainer}>
         <Text style={[styles.chatText, { color: fontColor }]}>
@@ -82,16 +97,17 @@ const Chat = () => {
         renderBubble={renderBubble}
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: 1,
+          _id: userID,
           name: userName,
         }}
         placeholder="Type a message..."
         keyboardShouldPersistTaps="handled"
+        bottomOffset={Platform.OS === "ios" ? 50 : 0}
       />
       {Platform.OS === "android" ? (
         <KeyboardAvoidingView behavior="height" />
       ) : null}
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -111,5 +127,3 @@ const styles = StyleSheet.create({
 });
 
 export default Chat;
-
-// test
