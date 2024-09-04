@@ -56,18 +56,30 @@ const Start = ({ navigation }) => {
               <TouchableOpacity
                 style={[styles.colorCircle, { backgroundColor: "#090C08" }]}
                 onPress={() => setBgColor("#090C08")}
+                accessibilityRole="button"
+                accessibilityLabel="Black color option"
+                accessibilityHint="Selects black as the background color"
               />
               <TouchableOpacity
                 style={[styles.colorCircle, { backgroundColor: "#474056" }]}
                 onPress={() => setBgColor("#474056")}
+                accessibilityRole="button"
+                accessibilityLabel="Purple color option"
+                accessibilityHint="Selects purple as the background color"
               />
               <TouchableOpacity
                 style={[styles.colorCircle, { backgroundColor: "#8A95A5" }]}
                 onPress={() => setBgColor("#8A95A5")}
+                accessibilityRole="button"
+                accessibilityLabel="Blue color option"
+                accessibilityHint="Selects blue as the background color"
               />
               <TouchableOpacity
                 style={[styles.colorCircle, { backgroundColor: "#B9C6AE" }]}
                 onPress={() => setBgColor("#B9C6AE")}
+                accessibilityRole="button"
+                accessibilityLabel="Green color option"
+                accessibilityHint="Selects green as the background color"
               />
             </View>
 
@@ -76,6 +88,9 @@ const Start = ({ navigation }) => {
               onPress={() =>
                 navigation.navigate("Chat", { userName: text, bgColor })
               }
+              accessibilityRole="button"
+              accessibilityLabel="Start chatting"
+              accessibilityHint="Navigates to the chat screen"
             >
               <Text style={styles.startButtonText}>Start Chatting!</Text>
             </TouchableOpacity>
