@@ -4,15 +4,21 @@ import {
   Text,
   View,
   TextInput,
-  Button,
   ImageBackground,
   Dimensions,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
+
 import backgroundImage from "../assets/Background Image.png";
 
 const Start = ({ navigation }) => {
+  // for name
   const [text, setText] = useState("");
+  // for background color options
   const [bgColor, setBgColor] = useState("");
 
   return (
@@ -21,51 +27,62 @@ const Start = ({ navigation }) => {
       style={styles.backgroundImage}
       imageStyle={styles.imageStyle}
     >
-      <View style={styles.container}>
-        <Text style={styles.appTitle}>Home Huddle</Text>
+      <Text style={styles.appTitle}>Home Huddle</Text>
 
-        <View style={styles.borderBox}>
-          <TextInput
-            style={styles.textInput}
-            value={text}
-            onChangeText={setText}
-            placeholder="Your Name"
-            placeholderTextColor="#757083"
-          />
+      {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}> */}
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.select({ ios: 50, android: 80 })}
+      >
+        <View style={styles.container}>
+          {/* Main interactive box */}
 
-          <Text style={styles.chooseBackgroundColor}>
-            Choose Background Color:
-          </Text>
+          <View style={styles.borderBox}>
+            <TextInput
+              style={styles.textInput}
+              value={text}
+              onChangeText={setText}
+              placeholder="Your Name"
+              placeholderTextColor="#757083"
+            />
 
-          <View style={styles.colorOptions}>
+            <Text style={styles.chooseBackgroundColor}>
+              Choose Background Color:
+            </Text>
+
+            {/* Color options section */}
+            <View style={styles.colorOptions}>
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#090C08" }]}
+                onPress={() => setBgColor("#090C08")}
+              />
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#474056" }]}
+                onPress={() => setBgColor("#474056")}
+              />
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#8A95A5" }]}
+                onPress={() => setBgColor("#8A95A5")}
+              />
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#B9C6AE" }]}
+                onPress={() => setBgColor("#B9C6AE")}
+              />
+            </View>
+
             <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#090C08" }]}
-              onPress={() => setBgColor("#090C08")}
-            />
-            <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#474056" }]}
-              onPress={() => setBgColor("#474056")}
-            />
-            <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#8A95A5" }]}
-              onPress={() => setBgColor("#8A95A5")}
-            />
-            <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#B9C6AE" }]}
-              onPress={() => setBgColor("#B9C6AE")}
-            />
+              style={styles.startButton}
+              onPress={() =>
+                navigation.navigate("Chat", { userName: text, bgColor })
+              }
+            >
+              <Text style={styles.startButtonText}>Start Chatting!</Text>
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            style={styles.startButton}
-            onPress={() =>
-              navigation.navigate("Chat", { userName: text, bgColor })
-            }
-          >
-            <Text style={styles.startButtonText}>Start Chatting!</Text>
-          </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
+      {/* </TouchableWithoutFeedback> */}
     </ImageBackground>
   );
 };
@@ -91,10 +108,16 @@ const styles = StyleSheet.create({
       { scale: 1.3 },
     ],
   },
+  keyboardAvoidingView: {
+    flex: 1,
+    justifyContent: "flex-end",
+    width: "100%",
+  },
+
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
   },
   appTitle: {
     fontSize: 45,
@@ -105,30 +128,30 @@ const styles = StyleSheet.create({
     top: 125,
   },
   borderBox: {
-    position: "absolute",
     bottom: 25,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    height: "44%",
+    height: 360,
     width: "88%",
+    padding: 10,
+    paddingTop: 50,
+    paddingBottom: 40,
   },
   textInput: {
     // inner text styles
     fontSize: 16,
     fontWeight: "300",
     color: "#757083",
-    position: "absolute",
     fontFamily: "Poppins-Medium",
     opacity: 0.5,
     // Outer box styles
-    top: 25,
+    top: 85,
     width: "88%",
     height: 60,
     borderWidth: 2,
     borderColor: "#757083",
     padding: 10,
-    marginBottom: 30,
     borderRadius: 2,
   },
   colorOptions: {
@@ -136,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     width: "88%",
-    marginBottom: 80,
+    marginBottom: 50,
   },
   chooseBackgroundColor: {
     fontSize: 16,
@@ -144,7 +167,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-SemiBold",
     color: "#757083",
     marginBottom: 20,
-    marginTop: 150,
+    marginTop: 140,
     alignSelf: "flex-start",
     marginLeft: "6%",
     opacity: 1,
@@ -160,7 +183,7 @@ const styles = StyleSheet.create({
     width: "88%",
     padding: 15,
     alignItems: "center",
-    marginBottom: 55,
+    marginBottom: 90,
   },
   startButtonText: {
     color: "#FFFFFF",
