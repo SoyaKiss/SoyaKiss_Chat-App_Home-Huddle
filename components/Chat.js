@@ -17,50 +17,84 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { InputToolbar } from "react-native-gifted-chat";
 
-const Chat = ({ db }) => {
+const Chat = ({ db, isConnected }) => {
   const route = useRoute();
   const navigation = useNavigation();
   const { userName, userID, bgColor } = route.params || {};
   const [messages, setMessages] = useState([]);
 
+  // Set navigation title to user's name
   useEffect(() => {
     if (userName) {
       navigation.setOptions({ title: userName });
     }
   }, [navigation, userName]);
 
+  // Handle fetching and caching messages based on connection status
   useEffect(() => {
     const messagesRef = collection(db, "messages");
-
     const messagesQuery = query(messagesRef, orderBy("createdAt", "desc"));
 
-    const unsubscribe = onSnapshot(
-      messagesQuery,
-      (snapshot) => {
-        const fetchedMessages = snapshot.docs.map((doc) => {
-          const data = doc.data();
+    if (isConnected) {
+      // Online: Fetch messages from Firestore and cache them
+      const unsubscribe = onSnapshot(
+        messagesQuery,
+        (snapshot) => {
+          const fetchedMessages = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              _id: doc.id,
+              ...data,
+              createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+            };
+          });
 
-          return {
-            _id: doc.id,
-            ...data,
-            createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
-          };
+          setMessages(fetchedMessages);
+
+          // Cache messages locally
+          AsyncStorage.setItem(
+            "cachedMessages",
+            JSON.stringify(fetchedMessages)
+          )
+            .then(() => {
+              console.log("Messages cached locally");
+            })
+            .catch((error) => {
+              console.error("Error caching messages: ", error);
+            });
+        },
+        (error) => {
+          console.error("Error fetching messages: ", error); // Log any errors that occur during fetching
+        }
+      );
+
+      // Cleanup the listener on component unmount
+      return () => unsubscribe();
+    } else {
+      // Offline: Load cached messages from local storage
+      AsyncStorage.getItem("cachedMessages")
+        .then((cachedMessages) => {
+          if (cachedMessages) {
+            setMessages(JSON.parse(cachedMessages));
+          } else {
+            console.log("No cached messages found");
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading cached messages: ", error);
         });
+    }
+  }, [db, isConnected]);
 
-        setMessages(fetchedMessages);
-      },
-      (error) => {
-        console.error("Error fetching messages: ", error); // Log any errors that occur during fetching
-      }
-    );
-
-    // Cleanup the listener on component unmount
-    return () => unsubscribe();
-  }, [db]);
-
+  // Function to handle sending messages
   const onSend = (newMessages) => {
-    addDoc(collection(db, "messages"), newMessages[0]);
+    addDoc(collection(db, "messages"), {
+      ...newMessages[0],
+      createdAt: new Date(),
+    });
   };
 
   const renderBubble = (props) => {
@@ -103,6 +137,9 @@ const Chat = ({ db }) => {
         placeholder="Type a message..."
         keyboardShouldPersistTaps="handled"
         bottomOffset={Platform.OS === "ios" ? 50 : 0}
+        renderInputToolbar={(props) =>
+          isConnected ? <InputToolbar {...props} /> : null
+        }
       />
       {Platform.OS === "android" ? (
         <KeyboardAvoidingView behavior="height" />

@@ -4,17 +4,21 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { initializeApp, getApps, getApp } from "firebase/app"; // Import getApps and getApp
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Correctly import AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
+import { useEffect, useState } from "react";
+import { enableNetwork, disableNetwork } from "firebase/firestore";
+import { Alert } from "react-native";
 
 import Start from "./components/Start";
 import Chat from "./components/Chat";
 
 const Stack = createNativeStackNavigator();
 
-// Firebase configuration
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCn7j6MhLkp-DiKrGIhM0EyyN3CdY0Timc",
   authDomain: "home-huddle-kiss.firebaseapp.com",
@@ -47,6 +51,33 @@ const App = () => {
     "Poppins-LightItalic": require("./assets/Poppins/Poppins-LightItalic.ttf"),
   });
 
+  // This is to track the connection status
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsConnected(state.isConnected);
+      if (state.isConnected) {
+        enableNetwork(db).catch((error) => {
+          console.error("Failed to enable Firestore network:", error);
+        });
+      } else {
+        disableNetwork(db).catch((error) => {
+          console.error("Failed to disable Firestore network:", error);
+        });
+        Alert.alert(
+          "Connection Lost!",
+          "Your device has lost its connection to the network.",
+          [{ text: "OK " }]
+        );
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   if (!fontsLoaded) {
     return null;
   }
@@ -56,7 +87,7 @@ const App = () => {
       <Stack.Navigator initialRouteName="Start">
         <Stack.Screen name="Start" component={Start} />
         <Stack.Screen name="Chat">
-          {(props) => <Chat {...props} db={db} />}
+          {(props) => <Chat {...props} db={db} isConnected={isConnected} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
