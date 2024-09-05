@@ -6,25 +6,40 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  Alert,
 } from "react-native";
-import { useState, useEffect, useCallback } from "react";
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import { useState, useEffect } from "react";
+import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import {
   addDoc,
   collection,
   query,
   orderBy,
   onSnapshot,
-  serverTimestamp,
 } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { InputToolbar } from "react-native-gifted-chat";
 
 const Chat = ({ db, isConnected }) => {
   const route = useRoute();
   const navigation = useNavigation();
   const { userName, userID, bgColor } = route.params || {};
   const [messages, setMessages] = useState([]);
+
+  const clearMessages = async () => {
+    try {
+      await AsyncStorage.removeItem("cachedMessages");
+      console.log("Messages cleared from storage");
+    } catch (error) {
+      console.error("Error clearing messages: ", error);
+    }
+  };
+
+  useEffect(() => {
+    // Clear messages when the component unmounts
+    return () => {
+      clearMessages(); // This will clear the cached messages when the component is unmounted
+    };
+  }, []);
 
   // Set navigation title to user's name
   useEffect(() => {
