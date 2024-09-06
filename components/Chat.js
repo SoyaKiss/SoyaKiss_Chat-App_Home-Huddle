@@ -18,8 +18,11 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomActions from "./CustomActions";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import MapView from "react-native-maps";
 
-const Chat = ({ db, isConnected }) => {
+const Chat = ({ db, isConnected, storage }) => {
   const route = useRoute();
   const navigation = useNavigation();
   const { userName, userID, bgColor } = route.params || {};
@@ -105,10 +108,13 @@ const Chat = ({ db, isConnected }) => {
   }, [db, isConnected]);
 
   // Function to handle sending messages
-  const onSend = (newMessages) => {
-    addDoc(collection(db, "messages"), {
-      ...newMessages[0],
-      createdAt: new Date(),
+  const onSend = (newMessages = []) => {
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, newMessages)
+    );
+
+    newMessages.forEach((message) => {
+      addDoc(collection(db, "messages"), message);
     });
   };
 
@@ -130,36 +136,60 @@ const Chat = ({ db, isConnected }) => {
 
   const fontColor = bgColor === "#B9C6AE" ? "#000000" : "#ced0d2";
 
+  const renderCustomView = (props) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
+  const renderCustomActions = (props) => {
+    return <CustomActions storage={storage} onSend={onSend} {...props} />;
+  };
+
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: bgColor }]}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.select({ ios: 75, android: 50 })}
-    >
-      <View style={styles.welcomeContainer}>
-        <Text style={[styles.chatText, { color: fontColor }]}>
-          Welcome, {userName}!
-        </Text>
-      </View>
-      <GiftedChat
-        messages={messages}
-        renderBubble={renderBubble}
-        onSend={(messages) => onSend(messages)}
-        user={{
-          _id: userID,
-          name: userName,
-        }}
-        placeholder="Type a message..."
-        keyboardShouldPersistTaps="handled"
-        bottomOffset={Platform.OS === "ios" ? 50 : 0}
-        renderInputToolbar={(props) =>
-          isConnected ? <InputToolbar {...props} /> : null
-        }
-      />
-      {Platform.OS === "android" ? (
-        <KeyboardAvoidingView behavior="height" />
-      ) : null}
-    </SafeAreaView>
+    <ActionSheetProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: bgColor }]}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.select({ ios: 75, android: 50 })}
+      >
+        <View style={styles.welcomeContainer}>
+          <Text style={[styles.chatText, { color: fontColor }]}>
+            Welcome, {userName}!
+          </Text>
+        </View>
+        <GiftedChat
+          messages={messages}
+          renderBubble={renderBubble}
+          onSend={(messages) => onSend(messages)}
+          renderActions={renderCustomActions}
+          renderCustomView={renderCustomView}
+          user={{
+            _id: userID,
+            name: userName,
+          }}
+          placeholder="Type a message..."
+          keyboardShouldPersistTaps="handled"
+          bottomOffset={Platform.OS === "ios" ? 50 : 0}
+          renderInputToolbar={(props) => <InputToolbar {...props} />}
+        />
+        {Platform.OS === "android" ? (
+          <KeyboardAvoidingView behavior="height" />
+        ) : null}
+      </SafeAreaView>
+    </ActionSheetProvider>
   );
 };
 

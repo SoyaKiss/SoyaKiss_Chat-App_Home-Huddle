@@ -12,6 +12,8 @@ import NetInfo from "@react-native-community/netinfo";
 import { useEffect, useState } from "react";
 import { enableNetwork, disableNetwork } from "firebase/firestore";
 import { Alert } from "react-native";
+import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
 import Start from "./components/Start";
 import Chat from "./components/Chat";
@@ -34,10 +36,22 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Initialize Firestore
 const db = getFirestore(app);
 
-// Initialize Firebase Auth with AsyncStorage persistence only once
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+const storage = getStorage(app);
+
+let auth;
+try {
+  // Check if auth has been initialized, otherwise initialize it
+  auth = getAuth(); // Import `getAuth` from Firebase Auth
+} catch (e) {
+  if (e.code === "auth/already-initialized") {
+    console.log("Auth already initialized");
+  } else {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  }
+}
+
 const App = () => {
   const [fontsLoaded] = useFonts({
     "Poppins-Regular": require("./assets/Poppins/Poppins-Regular.ttf"),
@@ -86,8 +100,16 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Start">
         <Stack.Screen name="Start" component={Start} />
+
         <Stack.Screen name="Chat">
-          {(props) => <Chat {...props} db={db} isConnected={isConnected} />}
+          {(props) => (
+            <Chat
+              isConnected={isConnected} // Ensure isConnected is correctly referenced
+              db={db}
+              storage={storage} // Pass storage object here
+              {...props}
+            />
+          )}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
