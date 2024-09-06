@@ -32,24 +32,17 @@ const firebaseConfig = {
 
 // Check if Firebase is already initialized, and initialize only if it hasn't been initialized
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
-// Initialize Firestore
 const db = getFirestore(app);
-
 const storage = getStorage(app);
 
+// Initialize Auth safely
 let auth;
-try {
-  // Check if auth has been initialized, otherwise initialize it
-  auth = getAuth(); // Import `getAuth` from Firebase Auth
-} catch (e) {
-  if (e.code === "auth/already-initialized") {
-    console.log("Auth already initialized");
-  } else {
-    auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
-  }
+if (!getApps().length) {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+} else {
+  auth = getAuth(app);
 }
 
 const App = () => {
