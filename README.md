@@ -76,30 +76,3 @@ cd your-repository-folder</code></pre>
   <li><strong>Configure Firebase in Your App: </strong> Copy your Firebase configuration details from <strong>Project Settings > General</strong> in the Firebase console. Ensure your Firebase configuration in <code>App.js</code> matches the settings.</li>
 </ul>
 
-<br>
-
-<h3>Necessary Libraries to Install</h3>
-<ul>
-  <li>Install the following required libraries:
-    <pre><code>npm install @react-navigation/native @react-navigation/native-stack
-npm install react-native-gifted-chat
-npm install @react-native-async-storage/async-storage
-npm install @react-native-community/netinfo
-npm install @expo/react-native-action-sheet
-npm install firebase
-npm install expo-image-picker
-npm install expo-location
-npm install react-native-maps
-npm install expo-font</code></pre>
-  </li>
-</ul>
-
-<br>
-
-<h3>Running the App</h3>
-<ul>
-  <li><strong>Start the App with Expo: </strong> Run the app on an emulator or your connected device using:
-    <pre><code>npx expo start</code></pre>
-  </li>
-  <li><strong>Open the App on an Emulator: </strong> Ensure your Android Emulator or iOS Simulator is running, then choose the appropriate option in the Expo DevTools.</li>
-</ul>
